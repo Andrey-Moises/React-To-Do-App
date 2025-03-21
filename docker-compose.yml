@@ -1,4 +1,22 @@
 services:
+  api:
+    build: ./server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/app
+    environment:
+      DATABASE_NAME: todoApp
+      HOST: mongodb
+      PORT: 27017
+      USERNAME: root
+      PASSWORD: rootpassword
+      DATABASE_URL: mongodb://root:rootpassword@mongodb:27017/
+      AUTH_SOURCE: admin
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    command: flask run --host=0.0.0.0 --reload
   mongodb:
     image: mongo:6.0
     container_name: mongodb
@@ -9,6 +27,5 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
-
 volumes:
   mongodb_data:
