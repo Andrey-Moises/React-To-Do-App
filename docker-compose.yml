@@ -13,6 +13,9 @@ services:
       PASSWORD: rootpassword
       DATABASE_URL: mongodb://root:rootpassword@mongodb:27017/
       AUTH_SOURCE: admin
+      JWT_SECRET_KEY: eyJ0eXAiOiJKV1QiLCJhbGciOiJIuzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE3NDI2MDE2MDUsImV4cCI6MTc3NDEzNzYwNSwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0.ypO0f9ZMfRHa_ZkQxNL1y51hcTwz2y_yjx5-l6RlkVI
+      JWT_ACCESS_TOKEN_EXPIRES: 3600 # 1 hour
+      JWT_REFRESH_TOKEN_EXPIRES: 604800 # 7 days
     depends_on:
       - mongodb
     restart: unless-stopped

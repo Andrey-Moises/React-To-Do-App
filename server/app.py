@@ -1,62 +1,20 @@
 import os
-import glob
-import importlib.util
-from db             import db
-from flask          import Flask
-from models         import *
-from pymongo        import MongoClient
-from flask_smorest  import Api
-from resources.task import blp as TaskBlueprint
-
-def run_migrations():
-
-    """Ejecuta las migraciones en el directorio /migrations."""
-    try:
-        client = MongoClient(os.getenv("DATABASE_URL"))
-        db     = client.get_database("todoApp")
-        print("✅   Conexión a la base de datos establecida")
-
-        migrations_dir  = os.path.join(os.path.dirname(__file__), "migrations", "versions")
-        migration_files = sorted(glob.glob(os.path.join(migrations_dir, "*.py")))
-
-        try:
-            # Obtener las migraciones aplicadas
-            applied_migrations = db["migrations"].find({}, {"name": 1})
-            applied_names = [m["name"] for m in applied_migrations]
-        except Exception as e:
-            print("⚠️   Colección migrations no existe, iniciando desde cero")
-            applied_names = []
-
-        for file_path in migration_files:
-            filename = os.path.basename(file_path)
-            if filename in applied_names:
-                continue
-
-            try:
-                # Cargar y ejecutar la migración
-                spec = importlib.util.spec_from_file_location("migration_module", file_path)
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-
-                module.up(db)                                    # Ejecutar la función `up` de la migración
-                db["migrations"].insert_one({"name": filename})  # Registrar la migración
-                print(f"✅  Migración aplicada: {filename}")
-            except Exception as e:
-                print(f"❌  Error en {filename}: {str(e)}")
-                raise
-    except Exception as e:
-        print(f"❌  Error al conectar a la base de datos: {str(e)}")
-        raise
-
+from db                 import db
+from flask              import Flask
+from models             import *
+from datetime           import timedelta
+from flask_smorest      import Api
+from resources.task     import blp as TaskBlueprint
+from resources.user     import blp as UserBlueprint
+from resources.login    import blp as LoginBlueprint
+from flask_jwt_extended import JWTManager
+            
 def create_app():
 
     app = Flask(__name__)
-
     app.config["MONGODB_SETTINGS"] = {
         "host" : os.getenv("DATABASE_URL") + "todoApp?authSource=admin"
     }
-    
-    print(f"MongoDB URL: {app.config['MONGODB_SETTINGS']['host']}")
 
     # Configuración de Flask-Smorest
     app.config["API_TITLE"] = "Tasks API"
@@ -66,17 +24,21 @@ def create_app():
     app.config["OPENAPI_SWAGGER_UI_PATH"] = "/swagger-ui"
     app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
 
+    # Configuración de Flask-Smorest
     api = Api(app)
 
+    # Configuración de la base de datos
     db.init_app(app)
 
-    # Correr migraciones al iniciar la aplicación
-
-    with app.app_context():
-        run_migrations()
+    # Configuración de JWT
+    app.config["JWT_SECRET_KEY"]            = os.getenv("JWT_SECRET_KEY")
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"]  = timedelta(seconds=int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES")))
+    app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(seconds=int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES")))
+    jwt = JWTManager(app)
 
     # Registrar los blueprints
-
     api.register_blueprint(TaskBlueprint)
+    api.register_blueprint(UserBlueprint)
+    api.register_blueprint(LoginBlueprint)
 
     return app

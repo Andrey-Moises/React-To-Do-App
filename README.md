@@ -4,4 +4,5 @@ A simple React app for task in different states: pending, completed and late to 
 
 ## Features:
 
-* A custom system of Mongo Migrations
+* Token auth
+* Refresh token method
