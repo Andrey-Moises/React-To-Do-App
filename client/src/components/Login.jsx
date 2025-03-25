@@ -1,3 +1,5 @@
+//#region: React Imports
+
 import React, { useState } from 'react';
 import { 
   Container, 
@@ -17,11 +19,14 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
+//#endregion: React Imports
+
 const Login = ({ onLogin }) => {
+  
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email    : '',
+    password : '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -161,6 +166,7 @@ const Login = ({ onLogin }) => {
       </Paper>
     </Container>
   );
+
 };
 
 export default Login;

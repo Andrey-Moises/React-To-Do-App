@@ -6,7 +6,7 @@ from flask import abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from models.user   import UserModel
-# from schemas       import UserSchema
+
 
 blp = Blueprint(
     'tasks',

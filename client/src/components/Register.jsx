@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+//#region React Imports
+import React, { useEffect, useState } from 'react';
 import { 
   Container, 
   Box, 
@@ -18,7 +19,12 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 
+import useApi from '../hooks/useApi';
+import {RegisterService} from '../api/register.api';
+//#endregion
+
 const Register = () => {
+
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: '',
@@ -29,7 +35,20 @@ const Register = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { data, loading, error: err, request } = useApi(RegisterService.register);
+
+  useEffect(() => {
+    if (data) {
+      console.log(data);
+      if (data.status === 201) {
+        navigate('/login', { replace: true });
+        setError('');
+      }
+      else {
+        setError(data.message);
+      }
+    }
+  }, [data]);
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,8 +59,9 @@ const Register = () => {
   };
   
   const handleSubmit = async (e) => {
+
     e.preventDefault();
-    setError('');
+    setError(err);
     
     // Validaciones básicas
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
@@ -58,21 +78,21 @@ const Register = () => {
       setError('La contraseña debe tener al menos 6 caracteres');
       return;
     }
-    
+
     try {
-      setLoading(true);
-      // Simular registro (esto se reemplazará con tu API real)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Registro exitoso con:', formData);
-      
-      // Redirigir al login después del registro
-      navigate('/login');
-    } catch (err) {
-      setError('Error al registrarse. Por favor intenta de nuevo.');
-      console.error(err);
-    } finally {
-      setLoading(false);
+      await request(
+        `${formData.firstName} ${formData.lastName}`,
+        formData.email,
+        formData.password,
+        formData.firstName,
+        formData.lastName
+      );
     }
+    catch (error) {
+      setError(error);
+      console.error(error);
+    }
+
   };
   
   return (

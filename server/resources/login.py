@@ -37,7 +37,7 @@ class Login(MethodView):
         Login a user.
         """
         # Check if the username exists
-        user = UserModel.objects(username=user_data['username']).first()
+        user = UserModel.objects(email=user_data['user']).first()
         if not user:
             return {"message": "Invalid credentials"}, 400
 
@@ -59,7 +59,7 @@ class RefreshToken(MethodView):
     @blp.response(200)
     @blp.response(500)
     @jwt_required(refresh=True)
-    def post(self):
+    def get(self):
         """
         Refresh a token.
         """

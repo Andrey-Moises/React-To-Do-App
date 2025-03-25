@@ -3,6 +3,7 @@ from db                 import db
 from flask              import Flask
 from models             import *
 from datetime           import timedelta
+from flask_cors         import CORS
 from flask_smorest      import Api
 from resources.task     import blp as TaskBlueprint
 from resources.user     import blp as UserBlueprint
@@ -26,6 +27,13 @@ def create_app():
 
     # Configuración de Flask-Smorest
     api = Api(app)
+    CORS(
+        app,
+        origins=["*"],  # Cambia esto a la URL de tu frontend en producción
+        supports_credentials=True,
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"]
+    )
 
     # Configuración de la base de datos
     db.init_app(app)
